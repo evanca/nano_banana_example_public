@@ -1,0 +1,70 @@
+import 'package:flutter/material.dart';
+
+import '../../../state/cover_controller.dart';
+import 'dashed_action.dart';
+import 'press_action.dart';
+
+/// Everything below the plate: error, inputs, generate, download.
+class CoverActions extends StatelessWidget {
+  const CoverActions({
+    required this.controller,
+    required this.onTakeSelfie,
+    super.key,
+  });
+
+  final CoverController controller;
+  final VoidCallback onTakeSelfie;
+
+  @override
+  Widget build(BuildContext context) {
+    final busy = controller.isBusy;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (controller.error case final error?) ...[
+          Text(error, style: const TextStyle(fontSize: 12)),
+          const SizedBox(height: 22),
+        ],
+        Row(
+          children: [
+            Expanded(
+              child: DashedAction(
+                label: 'Upload a photo',
+                onPressed: busy ? null : controller.uploadSelfie,
+                leading: const Icon(Icons.arrow_upward, size: 14),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: DashedAction(
+                label: 'Take a selfie',
+                onPressed: busy ? null : onTakeSelfie,
+                leading: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+        PressAction(
+          label: 'Make the cover',
+          trailing: '~12 sec',
+          onPressed: busy || !controller.hasSelfie ? null : controller.generate,
+        ),
+        const SizedBox(height: 22),
+        DashedAction(
+          label: 'Download spread',
+          onPressed:
+              controller.draft?.image == null ? null : controller.saveCover,
+          leading: const Icon(Icons.arrow_downward, size: 14),
+        ),
+      ],
+    );
+  }
+}
